@@ -1,0 +1,11 @@
+﻿# ffigen.yaml
+name: DuifeneSign  # 生成的 Dart 类名
+description: "Bindings to duifene_sign_c.h"
+output: "lib/duifene_sign_bindings.dart"  # 生成的 Dart 文件路径
+headers:
+  entry-points: 
+    - "duifene_sign_c.h"  # 头文件路径
+  include-directives: 
+    - "duifene_sign_c.h"  # 包含的头文件
+llvm-path:
+  - 'D:/DevTools/llvm/'
