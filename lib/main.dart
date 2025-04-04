@@ -1,11 +1,12 @@
-import 'package:duifene_auto/pages/login_page.dart';
-import 'package:duifene_auto/pages/choose_course_page.dart';
-import 'package:flutter/material.dart';
-import 'duifene_service.dart';
+﻿import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import "services/duifene_service.dart";
+import 'pages/login_page.dart';
+import 'pages/course_page.dart';
 
 void main() {
-  // setupDuifeneService();// Initialize the Duifene service
-  runApp(const MyApp());
+  setupDuifeneService();
+  runApp(const ProviderScope(child: MyApp()));
 }
 
 class MyApp extends StatelessWidget {
@@ -14,15 +15,15 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
+      title: '对分易签到助手',
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+        colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
+        useMaterial3: true,
       ),
       home: LoginPage(),
       routes: {
-        '/login': (context) => LoginPage(),
-        '/choose_course': (context) => ChooseCoursePage(),
-        // Add other routes here
+        '/course': (context) => const CoursePage(),
+        // '/monitor': (context) => const MonitorPage(), // 监控页面
       },
     );
   }

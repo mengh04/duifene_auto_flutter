@@ -1,52 +1,45 @@
-﻿import 'package:duifene_auto/method.dart';
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../providers/duifene_session_provider.dart';
+class LoginPage extends ConsumerWidget {
+  LoginPage({super.key});
 
-class LoginPage extends StatefulWidget {
-  const LoginPage({super.key});
-
-  @override
-  State<LoginPage> createState() => _LoginPageState();
-}
-
-class _LoginPageState extends State<LoginPage> {
-  // 1. 创建TextEditingController管理输入
-  final TextEditingController _linkController = TextEditingController();
-
-  // 6. 释放资源
-  @override
-  void dispose() {
-    _linkController.dispose();
-    super.dispose();
-  }
+  final textfieldController = TextEditingController();
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final session = ref.watch(duifeneSessionProvider);
     return Scaffold(
       appBar: AppBar(
-        title: const Text('登录'),
+        title: const Text('对分易签到助手'),
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
+      body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
+            const Text(
+              '对分易签到助手',
+              style: TextStyle(fontSize: 24),
+            ),
             TextField(
-              controller: _linkController, // 绑定控制器
+              controller: textfieldController,
               decoration: const InputDecoration(
-                labelText: '输入登录链接',
+                labelText: '请输入登录链接',
                 border: OutlineInputBorder(),
               ),
-              keyboardType: TextInputType.url, // 优化键盘类型
             ),
-            const SizedBox(height: 24),
+            const SizedBox(height: 20),
             ElevatedButton(
               onPressed: () {
-                login(context, _linkController.text); // 调用登录方法
-              }, // 绑定登录方法
+                session.login(textfieldController.text);
+                Navigator.pushReplacementNamed(context, '/course');
+              },
               child: const Text('登录'),
             ),
-          ],
-        ),
+          ]
+        )
+
+        // child: 
       ),
     );
   }
