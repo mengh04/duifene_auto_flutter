@@ -2,7 +2,7 @@
 import 'dart:ffi' as ffi;
 import 'package:duifene_auto/core/duifene_sign_bindings.dart';
 import 'package:ffi/ffi.dart';
-import './duifene_service.dart';
+import '../../services/duifene_service.dart';
 
 class DuifeneSession {
   final Pointer<Void> _handle;
@@ -30,7 +30,7 @@ class DuifeneSession {
     return courseInfo;
   }
 
-  SignInfo_C getSignInfo(int index) {
+  Future<SignInfo_C> getSignInfo(int index) async {
     final signInfo = DuifeneService().duifeneSign.get_sign_info(_handle, index);
     return signInfo;
   }

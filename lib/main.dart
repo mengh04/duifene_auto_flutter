@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import "services/duifene_service.dart";
 import 'pages/login_page.dart';
 import 'pages/course_page.dart';
+import 'pages/monitor_page.dart';
 
 void main() {
   setupDuifeneService();
@@ -23,7 +24,7 @@ class MyApp extends StatelessWidget {
       home: LoginPage(),
       routes: {
         '/course': (context) => const CoursePage(),
-        // '/monitor': (context) => const MonitorPage(), // 监控页面
+        '/monitor': (context) => const MonitorPage(), // 监控页面
       },
     );
   }

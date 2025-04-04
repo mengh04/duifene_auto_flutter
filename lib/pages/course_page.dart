@@ -43,8 +43,9 @@ class CoursePage extends ConsumerWidget {
             const SizedBox(height: 20),
             ElevatedButton(
               onPressed: () {
-                final signInfo = session.getSignInfo(selectedCourseIndex!);
-                session.doSign(signInfo);
+                // final signInfo = session.getSignInfo(selectedCourseIndex!);
+                // session.doSign(signInfo);
+                Navigator.pushNamed(context, '/monitor', arguments: selectedCourseIndex);
               },
               child: const Text('开始签到'),
             ),

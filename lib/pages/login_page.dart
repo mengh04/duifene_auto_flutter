@@ -21,14 +21,18 @@ class LoginPage extends ConsumerWidget {
               '对分易签到助手',
               style: TextStyle(fontSize: 24),
             ),
-            TextField(
-              controller: textfieldController,
-              decoration: const InputDecoration(
-                labelText: '请输入登录链接',
-                border: OutlineInputBorder(),
+            SizedBox(height: 20),
+            Padding(
+              padding: EdgeInsets.symmetric(horizontal: 20),
+              child: TextField(
+                controller: textfieldController,
+                decoration: const InputDecoration(
+                  labelText: '请输入登录链接',
+                  border: OutlineInputBorder(),
+                ),
               ),
             ),
-            const SizedBox(height: 20),
+            const SizedBox(height: 40),
             ElevatedButton(
               onPressed: () {
                 session.login(textfieldController.text);
