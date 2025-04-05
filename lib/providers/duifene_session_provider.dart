@@ -1,5 +1,5 @@
 ﻿import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../pages/models/duifene_session.dart';
+import '../core/duifene_sign.dart';
 
 final duifeneSessionProvider = Provider<DuifeneSession>((ref) {
   final session = DuifeneSession();

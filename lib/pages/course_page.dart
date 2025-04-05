@@ -11,10 +11,8 @@ class CoursePage extends ConsumerWidget {
     final session = ref.watch(duifeneSessionProvider);
 
     final List<DropdownMenuEntry<int>> dropdownMenuEntries = [];
-    for (int i = 0; i < session.getCourseCount(); i++) {
-      final courseInfo = session.getCourseInfo(i);
-      final courseNamePtr = courseInfo.course_name;
-      final courseName = courseNamePtr.cast<Utf8>().toDartString();
+    for (int i = 0; i < session.courseList.length; i++) {
+      final courseName = session.courseList[i].courseName;
       dropdownMenuEntries.add(DropdownMenuEntry<int>(
         value: i,
         label: courseName

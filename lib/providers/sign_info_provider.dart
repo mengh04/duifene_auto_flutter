@@ -3,16 +3,16 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'duifene_session_provider.dart';
 
 
-final signInfoProvider = StateNotifierProvider<SignInfoNotifier, SignInfo>((ref) {
+final signInfoProvider = StateNotifierProvider<SignInfoNotifier, NativeSignInfo>((ref) {
   return SignInfoNotifier(ref);
 });
 
-class SignInfoNotifier extends StateNotifier<SignInfo> {
+class SignInfoNotifier extends StateNotifier<NativeSignInfo> {
   final Ref ref;
-  SignInfoNotifier(this.ref) : super(SignInfo.empty());
+  SignInfoNotifier(this.ref) : super(NativeSignInfo.empty());
 
   Future<void> getSignInfo(int index) async {
     final session = ref.read(duifeneSessionProvider);
-    state = SignInfo.fromC(await session.getSignInfo(index));
+    state = NativeSignInfo.from(await session.getSignInfo(index));
   }
 }
