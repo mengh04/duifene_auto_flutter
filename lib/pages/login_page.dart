@@ -36,7 +36,9 @@ class LoginPage extends ConsumerWidget {
             ElevatedButton(
               onPressed: () async {
                 await session.login(textfieldController.text);
-                Navigator.pushNamed(context, '/course');
+                if (context.mounted) {
+                  Navigator.pushReplacementNamed(context, '/course');
+                }
               },
               child: const Text('登录'),
             ),

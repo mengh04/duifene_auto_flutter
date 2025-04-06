@@ -184,12 +184,10 @@ class DuifeneSession {
     );
     if (response.statusCode == 302) {
       final String locationUrl = response.headers['location']!.first;
-      print(response.headers);
       final locationResponse = await dio.get(locationUrl);
       if (locationResponse.statusCode != 200) {
         throw '重定向失败: ${locationResponse.statusCode}';
       } else {
-        print("重定向");
         final String data = locationResponse.data;
         final document = html_parser.parse(data);
         signInfo.hfSeconds = document.getElementById('HFSeconds')?.attributes['value'] ?? '';
@@ -273,8 +271,9 @@ class DuifeneSession {
     if (response.statusCode == 200) {
       final String data = response.data;
       final result = jsonDecode(data);
-      if (result['msg'] != '1') {
+      if (result['msg'] != 1) {
         throw '签到码签到失败';
+        // 这里可能message == -2，表示已经签到成功了
       }
     } else {
       throw '签到码签到失败: ${response.statusCode}';
@@ -290,7 +289,6 @@ class DuifeneSession {
     );
     if (response.statusCode == 200) {
         final String data = response.data;
-        print(data);
         if (!data.contains('DivOK')) {
           throw '二维码签到失败';
         }
