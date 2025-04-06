@@ -70,15 +70,15 @@ class _MonitorPageState extends ConsumerState<MonitorPage> {
           );
         });
       }
-      debugPrint('当前课程索引: $selectedIndex');
-      debugPrint('当前课程签到类型: ${signInfo.hfCheckType}');
-      debugPrint('当前课程签到ID: ${signInfo.hfCheckInId}');
-      debugPrint('当前课程剩余秒数: ${signInfo.hfSeconds}');
-      debugPrint('当前课程教室纬度: ${signInfo.hfRoomLatitude}');
-      debugPrint('当前课程教室经度: ${signInfo.hfRoomLongitude}');
-      debugPrint('当前课程签到人数: ${signInfo.signedAmount}');
-      debugPrint('当前课程总人数: ${signInfo.totalAmount}');
-      debugPrint('签到码: ${signInfo.hfCheckCodeKey}');
+      // debugPrint('当前课程索引: $selectedIndex');
+      // debugPrint('当前课程签到类型: ${signInfo.hfCheckType}');
+      // debugPrint('当前课程签到ID: ${signInfo.hfCheckInId}');
+      // debugPrint('当前课程剩余秒数: ${signInfo.hfSeconds}');
+      // debugPrint('当前课程教室纬度: ${signInfo.hfRoomLatitude}');
+      // debugPrint('当前课程教室经度: ${signInfo.hfRoomLongitude}');
+      // debugPrint('当前课程签到人数: ${signInfo.signedAmount}');
+      // debugPrint('当前课程总人数: ${signInfo.totalAmount}');
+      // debugPrint('签到码: ${signInfo.hfCheckCodeKey}');
   }
 
   @override
