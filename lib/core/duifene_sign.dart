@@ -1,7 +1,7 @@
 import 'package:dio/dio.dart';
 import 'dart:convert';
 import 'package:html/parser.dart' as html_parser;
-
+import '../models/sign_info.dart';
 String extractUserCode(String userLink) {
   final RegExp regex = RegExp(r'code=(\S{32})&');
   final match = regex.firstMatch(userLink);
@@ -244,7 +244,7 @@ class DuifeneSession {
     return studentAmount;
   }
 
-  Future<void> signIn(SignInfo signInfo) async {
+  Future<void> signIn(NativeSignInfo signInfo) async {
     String hfCheckType = signInfo.hfCheckType;
     if (hfCheckType == '1') {
       await signByCode(signInfo.hfCheckCodeKey);
@@ -290,7 +290,8 @@ class DuifeneSession {
     );
     if (response.statusCode == 200) {
         final String data = response.data;
-        if (!data.contains('divok')) {
+        print(data);
+        if (!data.contains('DivOK')) {
           throw '二维码签到失败';
         }
     } else {
@@ -321,7 +322,7 @@ class DuifeneSession {
     if (response.statusCode == 200) {
       final String data = response.data;
       final result = jsonDecode(data);
-      if (result['msg'] != '1') {
+      if (result['msg'] != 1) {
         throw '定位签到失败';
       }
     } else {

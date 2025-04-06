@@ -1,4 +1,4 @@
-﻿import 'package:duifene_auto/pages/models/sign_info.dart';
+﻿import 'package:duifene_auto/models/sign_info.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'duifene_session_provider.dart';
 

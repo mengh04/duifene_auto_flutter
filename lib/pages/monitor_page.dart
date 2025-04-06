@@ -1,6 +1,8 @@
-﻿import 'package:duifene_auto/providers/sign_info_provider.dart';
+﻿import 'package:duifene_auto/providers/duifene_session_provider.dart';
+import 'package:duifene_auto/providers/sign_info_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../models/sign_info.dart';
 import 'dart:async';
 
 class MonitorPage extends ConsumerStatefulWidget {
@@ -43,9 +45,12 @@ class _MonitorPageState extends ConsumerState<MonitorPage> {
 
   Future<void> _checkSignInStatus() async {
       ref.read(signInfoProvider.notifier).getSignInfo(selectedIndex);
-      final signInfo = ref.read(signInfoProvider);
+      final sessionProvider = ref.read(duifeneSessionProvider);
+      final NativeSignInfo signInfo = ref.read(signInfoProvider);
       if (signInfo.signedAmount / signInfo.totalAmount >= 0.5) {
+        sessionProvider.signIn(signInfo);
         _stopPolling(); // 停止轮询
+
         WidgetsBinding.instance.addPostFrameCallback((_) {
           showDialog(
             context: context,
@@ -54,7 +59,10 @@ class _MonitorPageState extends ConsumerState<MonitorPage> {
               content: const Text('签到已完成，停止监控。'),
               actions: [
                 TextButton(
-                  onPressed: () => Navigator.pop(context),
+                  onPressed: () {
+                    Navigator.pop(context);
+
+                  },
                   child: const Text('确定'),
                 ),
               ],
@@ -63,7 +71,7 @@ class _MonitorPageState extends ConsumerState<MonitorPage> {
         });
       }
       debugPrint('当前课程索引: $selectedIndex');
-      debugPrint('当前课程签到类型: ${signInfo.hfChecktype}');
+      debugPrint('当前课程签到类型: ${signInfo.hfCheckType}');
       debugPrint('当前课程签到ID: ${signInfo.hfCheckInId}');
       debugPrint('当前课程剩余秒数: ${signInfo.hfSeconds}');
       debugPrint('当前课程教室纬度: ${signInfo.hfRoomLatitude}');
@@ -126,7 +134,7 @@ class _MonitorPageState extends ConsumerState<MonitorPage> {
                         style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                       ),
                       const SizedBox(height: 16),      
-                      _buildInfoRow('签到类型', signInfo.hfChecktype),
+                      _buildInfoRow('签到类型', signInfo.hfCheckType),
                       _buildInfoRow('签到ID', signInfo.hfCheckInId),
                       _buildInfoRow('剩余秒数', signInfo.hfSeconds),
                       _buildInfoRow('教室纬度', signInfo.hfRoomLatitude),

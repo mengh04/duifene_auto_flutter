@@ -1,6 +1,6 @@
-﻿import '../../core/duifene_sign.dart';
+﻿import '../core/duifene_sign.dart';
 class NativeSignInfo {
-  String hfChecktype = '';
+  String hfCheckType = '';
   String hfCheckInId = '';
   String hfSeconds = '';
   String hfClassId = '';
@@ -12,7 +12,7 @@ class NativeSignInfo {
 
   NativeSignInfo.empty();
   NativeSignInfo.from(SignInfo signInfo) {
-    hfChecktype = signInfo.hfCheckType;
+    hfCheckType = signInfo.hfCheckType;
     hfCheckInId = signInfo.hfCheckInId;
     hfSeconds = signInfo.hfSeconds;
     hfClassId = signInfo.hfClassId;
