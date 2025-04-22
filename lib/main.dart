@@ -5,10 +5,19 @@ import 'pages/monitor_page.dart';
 import 'package:get/get.dart';
 import 'core/duifene_sign.dart';
 import 'controllers/sign_info_controller.dart';
+import 'controllers/sign_monitor_controller.dart';
+import 'services/notification_service.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
   Get.put<DuifeneSession>(DuifeneSession());
   Get.put<SignInfoController>(SignInfoController());
+  Get.put<SignMonitorController>(SignMonitorController(
+    Get.find<SignInfoController>(),
+    Get.find<DuifeneSession>(),
+  ));
+
+  await NotificationService().init();
   runApp(const DuifeneAutoApp());
 }
 

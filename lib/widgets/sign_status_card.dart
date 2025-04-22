@@ -40,7 +40,7 @@ class SignStatusCard extends StatelessWidget {
       case '3':
         return '定位签到';
       default:
-        return '未知签到类型';
+        return '未检测到签到';
     }
   }
 

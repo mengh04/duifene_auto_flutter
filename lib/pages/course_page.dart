@@ -40,7 +40,7 @@ class CoursePage extends StatelessWidget {
             const SizedBox(height: 20),
             ElevatedButton(
               onPressed: () {
-                Navigator.pushNamed(context, '/monitor', arguments: selectedCourseIndex);
+                Get.toNamed('/monitor', arguments: selectedCourseIndex);
               },
               child: const Text('开始签到'),
             ),
