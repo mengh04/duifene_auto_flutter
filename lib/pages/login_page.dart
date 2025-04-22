@@ -1,14 +1,17 @@
 ﻿import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../providers/duifene_session_provider.dart';
-class LoginPage extends ConsumerWidget {
+import '../core/duifene_sign.dart';
+import 'package:get/get.dart';
+
+class LoginPage extends StatelessWidget {
   LoginPage({super.key});
 
   final textfieldController = TextEditingController();
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final session = ref.watch(duifeneSessionProvider);
+  Widget build(BuildContext context) {
+    
+    final session = Get.find<DuifeneSession>();
+    
     return Scaffold(
       appBar: AppBar(
         title: const Text('对分易签到助手'),

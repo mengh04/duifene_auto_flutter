@@ -2,6 +2,8 @@ import 'package:dio/dio.dart';
 import 'dart:convert';
 import 'package:html/parser.dart' as html_parser;
 import '../models/sign_info.dart';
+
+
 String extractUserCode(String userLink) {
   final RegExp regex = RegExp(r'code=(\S{32})&');
   final match = regex.firstMatch(userLink);

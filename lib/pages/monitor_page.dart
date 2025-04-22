@@ -1,21 +1,34 @@
-﻿import 'package:duifene_auto/providers/duifene_session_provider.dart';
-import 'package:duifene_auto/providers/sign_info_provider.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../models/sign_info.dart';
+﻿import 'package:flutter/material.dart';
 import 'dart:async';
+import 'package:get/get.dart';
+import '../../core/duifene_sign.dart';
+import '../../controllers/sign_info_controller.dart';
+import '../services/sign_monitor_service.dart';
+import '../widgets/sign_status_card.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
-class MonitorPage extends ConsumerStatefulWidget {
+class MonitorPage extends StatefulWidget {
   const MonitorPage({super.key});
-
   @override
-  ConsumerState<MonitorPage> createState() => _MonitorPageState();
+  State<MonitorPage> createState() => _MonitorPageState();
 }
 
-class _MonitorPageState extends ConsumerState<MonitorPage> {
-  Timer? _timer;
+class _MonitorPageState extends State<MonitorPage> {
+  bool _isPolling = false; // 控制轮询状态
   late int selectedIndex;
-  bool _isChecking = false; // 添加标志位
+  final signInfoController = Get.find<SignInfoController>();
+  final session = Get.find<DuifeneSession>();
+  late final SignMonitorService _signMonitorService;
+  String checkedId = 'None';
+  late FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin;
+
+  @override
+  void initState() {
+    super.initState();
+    _signMonitorService = SignMonitorService(signInfoController, session);
+    flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
+    _initializeNotifications();
+  }
 
   @override
   void didChangeDependencies() {
@@ -31,78 +44,87 @@ class _MonitorPageState extends ConsumerState<MonitorPage> {
     super.dispose();
   }
 
+  void _initializeNotifications() async {
+    const InitializationSettings initializationSettings =
+        InitializationSettings(
+      // android: AndroidInitializationSettings('@mipmap/ic_launcher'),
+      // iOS: IOSInitializationSettings(),
+      // macOS: MacOSInitializationSettings(),
+      windows: WindowsInitializationSettings(
+        appName: 'Notification Demo',
+        appUserModelId: 'com.example.notification_demo',
+        guid: '7bbcd97c-97b5-4595-9598-0778a3bbaadf',
+      ),
+    );
+
+    await flutterLocalNotificationsPlugin.initialize(initializationSettings);
+  }
+
+  // 启动轮询
   void _startPolling() {
-    if (_timer != null) return; // 防止重复启动计时器
-    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
-      _checkSignInStatus();
-    });
+    if (_isPolling) return;
+    _isPolling = true;
+    _poll();
   }
 
+  void showNotification(String title, String body) {
+    const notificationDetails = NotificationDetails(
+      windows: WindowsNotificationDetails(
+        // Windows 上通知没有太多选项，只要这个就行
+        // 可加 icon/image/音效等，但最基础就这样
+      ),
+    );
+    flutterLocalNotificationsPlugin.show(
+      0,
+      title,
+      body,
+      notificationDetails,
+    );
+  }
+
+  // 停止轮询
   void _stopPolling() {
-    _timer?.cancel();
-    _timer = null; // 确保计时器被清除
+    _isPolling = false;
   }
 
-  Future<void> _checkSignInStatus() async {
-    if (_isChecking) return; // 如果正在检查，直接返回
-    _isChecking = true; // 设置标志位，表示正在检查
+  // 异步轮询
+  void _poll() async {
+    if (!_isPolling) return;
 
-    try {
-      ref.read(signInfoProvider.notifier).getSignInfo(selectedIndex);
-      final sessionProvider = ref.read(duifeneSessionProvider);
-      final NativeSignInfo signInfo = ref.read(signInfoProvider);
-
-      if (signInfo.signedAmount / signInfo.totalAmount >= 0.5) {
-        try {
-          await sessionProvider.signIn(signInfo);
-          showModalBottomSheet(
-            context: context,
-            builder: (context) => Container(
-              padding: const EdgeInsets.all(16.0),
-              child: Text('签到成功'),
-            ),
-          );
-          debugPrint("签到成功"); // 添加 await
-        } catch (e) {
-          showModalBottomSheet(
-            context: context,
-            builder: (context) => Container(
-              padding: const EdgeInsets.all(16.0),
-              child: Text('错误: $e'),
-            ),
-          );
-          debugPrint(e.toString());
-        }
-        _stopPolling(); // 停止轮询
-
-        // WidgetsBinding.instance.addPostFrameCallback((_) {
-        //   showDialog(
-        //     context: context,
-        //     builder: (context) => AlertDialog(
-        //       title: const Text('签到完成'),
-        //       content: const Text('签到已完成，停止监控。'),
-        //       actions: [
-        //         TextButton(
-        //           onPressed: () {
-        //             Navigator.pop(context);
-        //           },
-        //           child: const Text('确定'),
-        //         ),
-        //       ],
-        //     ),
-        //   );
-        // });
+    // 执行签到检查
+    final success = await _checkSignInStatus();
+    if (success) {
+      checkedId = signInfoController.signInfo.value.hfCheckInId;
+      debugPrint('签到成功: ${signInfoController.signInfo.value.hfCheckInId}');
+      showNotification('签到成功', '签到ID: ${signInfoController.signInfo.value.hfCheckInId}');
+      _stopPolling();  // 如果签到成功，停止轮询
+    } else {
+      // 使用 Future.delayed 替代递归调用，避免栈溢出
+      if (_isPolling) {
+        await Future.delayed(const Duration(seconds: 1));
+        _poll();  // 继续下次轮询
       }
-    } finally {
-      _isChecking = false; // 检查完成，重置标志位
+    }
+  }
+
+  // 检查签到状态
+  Future<bool> _checkSignInStatus() async {
+    if (checkedId == signInfoController.signInfo.value.hfCheckInId) {
+      return false;  // 如果签到ID没有变化，则不进行签到
+    }
+    try {
+      final success = await _signMonitorService.checkSignInStatus(selectedIndex, context);
+      return success;
+    } catch (e) {
+      debugPrint('$e');
+      return false;
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    final signInfo = ref.watch(signInfoProvider); // 自动监听变化
-    final notifier = ref.read(signInfoProvider.notifier);
-    final sessionProvider = ref.read(duifeneSessionProvider);
+    final course = session.courseList[selectedIndex];
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('签到监控'),
@@ -116,99 +138,45 @@ class _MonitorPageState extends ConsumerState<MonitorPage> {
       body: Center(
         child: Padding(
           padding: const EdgeInsets.all(16.0),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              // 课程信息
-              Card(
-                child: Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Column(
-                    children: [
-                      const Text(
-                        '当前监控课程',
-                        style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        sessionProvider.courseList[selectedIndex].courseName,
-                        style: const TextStyle(fontSize: 16),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-              
-              const SizedBox(height: 20),
-              
-              // 签到状态卡片
-              Card(
-                child: Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Column(
-                    children: [
-                      const Text(
-                        '签到状态',
-                        style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                      ),
-                      const SizedBox(height: 16),      
-                      _buildInfoRow('签到类型', () {
-                        switch (signInfo.hfCheckType) {
-                          case '0':
-                            return '未签到';
-                          case '1':
-                            return '二维码签到';
-                          case '2':
-                            return '二维码签到';
-                          case '3':
-                            return '定位签到';
-                          default:
-                            return '未知签到类型';
-                        }
-                      }()),
-                      _buildInfoRow('签到ID', signInfo.hfCheckInId),
-                      if (signInfo.hfCheckType == '1') ...[
-                        _buildInfoRow('签到码', signInfo.hfCheckCodeKey),
+          child: Obx(() {
+            final signInfo = signInfoController.signInfo.value;
+
+            return Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                // 课程卡片
+                Card(
+                  child: Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Column(
+                      children: [
+                        const Text('当前监控课程',
+                            style: TextStyle(
+                                fontSize: 18, fontWeight: FontWeight.bold)),
+                        const SizedBox(height: 8),
+                        Text(course.courseName,
+                            style: const TextStyle(fontSize: 16)),
                       ],
-                      _buildInfoRow('已签到人数', signInfo.signedAmount.toString()),
-                      _buildInfoRow('未签到人数', (signInfo.totalAmount - signInfo.signedAmount).toString()),
-
-                    ],
+                    ),
                   ),
                 ),
-              ),
-              
-              const SizedBox(height: 20),
-              
-              // 操作按钮
-              ElevatedButton(
-                onPressed: () => notifier.getSignInfo(selectedIndex),
-                child: const Text('手动刷新'),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
 
-  Widget _buildInfoRow(String label, String value) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4.0),
-      child: Row(
-        children: [
-          Expanded(
-            flex: 2,
-            child: Text(
-              label,
-              style: const TextStyle(fontWeight: FontWeight.bold),
-            ),
-          ),
-          Expanded(
-            flex: 3,
-            child: Text(value.isEmpty ? '无' : value),
-          ),
-        ],
+                const SizedBox(height: 20),
+
+                // 签到状态卡片组件
+                SignStatusCard(signInfo: signInfo),
+
+                const SizedBox(height: 20),
+
+                // 手动刷新按钮
+                ElevatedButton(
+                  onPressed: () => signInfoController.getSignInfo(selectedIndex),
+                  child: const Text('手动刷新'),
+                ),
+              ],
+            );
+          }),
+        ),
       ),
     );
   }

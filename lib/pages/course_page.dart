@@ -1,13 +1,13 @@
 ﻿import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../providers/duifene_session_provider.dart';
+import 'package:get/get.dart';
+import 'package:duifene_auto/core/duifene_sign.dart';
 
-class CoursePage extends ConsumerWidget {
+class CoursePage extends StatelessWidget {
   const CoursePage({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final session = ref.watch(duifeneSessionProvider);
+  Widget build(BuildContext context) {
+    final session = Get.find<DuifeneSession>();
 
     final List<DropdownMenuEntry<int>> dropdownMenuEntries = [];
     for (int i = 0; i < session.courseList.length; i++) {
